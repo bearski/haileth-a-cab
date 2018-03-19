@@ -11,14 +11,17 @@ let accounts;
 let factory;
 let driverAddress;
 let driver;
-// let escrow;
+let escrow;
 
 beforeEach(async () => {
   accounts = await web3.eth.getAccounts();
 
   factory = await new web3.eth.Contract(JSON.parse(compiledFactory.interface))
     .deploy({ data: compiledFactory.bytecode})
-    .send({ from: accounts[0], gas: '1000000'});
+    .send({
+      from: accounts[0],
+      gas: '1000000'
+    });
 
   await factory.methods.createDriver()
     .send({
@@ -32,11 +35,7 @@ beforeEach(async () => {
       JSON.parse(compiledDriver.interface),                                     // send interface
       driverAddress                                                             // and address
     );
-
-    // escrow = await new web3.eth.Contract(                                       // contract already deployed.
-    //   JSON.parse(compiledEscrow.interface),                                     // send interface
-    //   driverAddress                                                             // and address
-    // );
+      
 });
 
 describe('Drivers', () => {
@@ -46,42 +45,72 @@ describe('Drivers', () => {
   });
 
   it('marks caller as the driver', async () => {
-    const drv = await driver.methods.driver().call();
-    assert.equal(accounts[0], drv);
+    const d = await driver.methods.driver().call();
+    assert.equal(accounts[0], d);
   });
-  //
-  // it('allows people contribute money and marks them as approvers', async () => {
-  //   await campaign.methods.contribute().send({
-  //     value: '200',
-  //     from: accounts[1]
-  //   });
-  //   const isContributor = await campaign.methods.approvers(accounts[1]).call();
-  //   assert(isContributor);  // truthy values pass
-  // });
-  //
-  // it('requires a minimum contribution', async () => {
-  //   try {
-  //     await campaign.methods.contribute.send({
-  //       value: '5',
-  //       from: accounts[1]
-  //     });
-  //     assert(false);
-  //   } catch (err) {
-  //     assert(err);
-  //   }
-  // });
-  //
-  // it('allows a manager to make a payment request', async () => {
-  //   await campaign.methods
-  //     .createRequest('Buy batteries', '100', accounts[1])
-  //     .send({
-  //       from: accounts[0],
-  //       gas: '1000000'
-  //     });
-  //   const request = await campaign.methods.requests(0).call();
-  //   assert.equal('Buy batteries', request.description)
-  // });
-  //
+
+  it('creates a trip request', async () => {
+    await driver.methods
+      .createTrip('10', accounts[1])
+      .send({
+        from: accounts[1],
+        gas: '1000000'
+      });
+
+    const trip = await driver.methods.trips(0).call();
+
+    // console.log(trip.cost)
+    assert.equal(10, trip.distance)
+    assert.equal(accounts[1], trip.passenger)
+  });
+
+  it('prevents the driver from creating a trip', async () => {
+    try {
+      await driver.methods
+        .createTrip('100', accounts[0])
+        .send({
+          from: accounts[0],
+          gas: '1000000'
+        });
+      assert(false);
+    } catch (err) {
+      assert(err);
+    }
+  });
+
+  it('prevents the driver from marking a trip as completed', async () => {
+      try {
+        await driver.methods
+          .completeTrip('0','5')
+          .send({
+            from: accounts[0],
+            gas: '1000000'
+          });
+        assert(false);
+      } catch (err) {
+        assert(err);
+      }
+    });
+
+  it('process a trip', async () => {
+    await driver.methods
+      .createTrip('10', accounts[1])
+      .send({
+        from: accounts[1],
+        gas: '1000000'
+      });
+
+    await driver.methods
+        .completeTrip('0','5')
+        .send({
+          from: accounts[1],
+          gas: '1000000'
+        });
+
+    const trip = await driver.methods.trips(0).call();
+    assert.equal(trip.complete, true)
+  });
+
   // it('processes requests', async () => {
   //   await campaign.methods.contribute().send({
   //     from: accounts[0],
