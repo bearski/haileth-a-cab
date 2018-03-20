@@ -3,7 +3,7 @@ import EscrowFactory from './build/EscrowFactory.json';
 
 const instance = new web3.eth.Contract(
   JSON.parse(EscrowFactory.interface),
-  '0x0C3c141E8999d3E329551E5FbF200D2F137BC4cc'
+  '0xFd1FA8f5bAb829C7e21cadFF8837153f9ca0BeEc'
 );
 
 export default instance;

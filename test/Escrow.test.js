@@ -3,13 +3,13 @@ const ganache = require('ganache-cli');
 const Web3 = require('web3');
 const web3 = new Web3(ganache.provider());
 
-const compiledFactory = require('../ethereum/build/DriverFactory.json');
-const compiledDriver = require('../ethereum/build/Driver.json');
+const compiledFactory = require('../ethereum/build/EscrowFactory.json');
+const compiledEscrow = require('../ethereum/build/Escrow.json');
 
 let accounts;
 let factory;
-let driverAddress;
-let driver;
+let escrowAddress;
+let escrow;
 
 beforeEach(async () => {
   accounts = await web3.eth.getAccounts();
@@ -18,48 +18,53 @@ beforeEach(async () => {
     .deploy({ data: compiledFactory.bytecode })
     .send({ from: accounts[0], gas: '1000000' });
 
-  await factory.methods.createDriver('100').send({
-    from: accounts[0],
-    gas: '1000000'
-  });
+  await factory.methods.createEscrow('100', accounts[1])
+    .send({
+      from: accounts[0],
+      gas: '1000000'
+    });
 
-  [driverAddress] = await factory.methods.getdriverDb().call();
-  driver = await new web3.eth.Contract(
-    JSON.parse(compiledDriver.interface),
-    driverAddress
+  [escrowAddress] = await factory.methods.getEscrowDb().call();
+  
+  escrow = await new web3.eth.Contract(
+    JSON.parse(compiledEscrow.interface),
+    escrowAddress
   );
 });
 
-describe('Drivers', () => {
-  it('deploys a factory and a driver', () => {
+describe('Escrow', () => {
+  it('deploys a factory and an escrow', () => {
     assert.ok(factory.options.address);
-    assert.ok(driver.options.address);
+    assert.ok(escrow.options.address);
   });
 
-  it('marks caller as the driver manager', async () => {
-    const manager = await driver.methods.manager().call();
-    assert.equal(accounts[0], manager);
+  it('identifies the seller and buyer correctly', async () => {
+    const seller = await escrow.methods.seller().call();
+    console.log(seller);
+    console.log(accounts[0]);
+
+    assert.equal(accounts[0], seller);
   });
 
-  it('allows people to contribute money and marks them as approvers', async () => {
-    await driver.methods.contribute().send({
-      value: '200',
-      from: accounts[1]
-    });
-    const isContributor = await driver.methods.approvers(accounts[1]).call();
-    assert(isContributor);
-  });
+  // it('allows people to contribute money and marks them as approvers', async () => {
+  //   await driver.methods.contribute().send({
+  //     value: '200',
+  //     from: accounts[1]
+  //   });
+  //   const isContributor = await driver.methods.approvers(accounts[1]).call();
+  //   assert(isContributor);
+  // });
 
-  it('requires a minimum contribution', async () => {
-    try {
-      await driver.methods.contribute().send({
-        value: '5',
-        from: accounts[1]
-      });
-      assert(false);
-    } catch (err) {
-      assert(err);
-    }
-  });
+  // it('requires a minimum contribution', async () => {
+  //   try {
+  //     await driver.methods.contribute().send({
+  //       value: '5',
+  //       from: accounts[1]
+  //     });
+  //     assert(false);
+  //   } catch (err) {
+  //     assert(err);
+  //   }
+  // });
 
 });

@@ -2,9 +2,8 @@ pragma solidity ^0.4.17;
 
 contract EscrowFactory {
     address[] public escrowDb;
-    address buyer_adress;
 
-    function createEscrow(uint amount) public {
+    function createEscrow(uint amount, address buyer_adress) public {
         address newEscrow = new Escrow(amount, msg.sender, buyer_adress);
         escrowDb.push(newEscrow);
     }
@@ -24,6 +23,7 @@ contract Escrow {
   function Escrow(uint amount, address seller, address buyer) public payable {
       seller = msg.sender;
       value = msg.value;
+      buyer = buyer;
   }
 
   modifier onlyBuyer() {
