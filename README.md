@@ -14,4 +14,4 @@ node deployEscrowFactory.js
 node deploy.js
 ```
 
-`deploy.js`, `deployEscrowFactory.js` and `web3.js` have config for the rinkeby.infura network.  Edit that if needed, you don't have to it's dev and it's free :)
+`deploy.js`, `deployEscrowFactory.js` and `web3.js` have config for the rinkeby.infura network.  Edit that if needed, you don't have to. It's dev and it's free :)
