@@ -75,6 +75,17 @@ class DriverShow extends Component {
               <ContributeForm address={this.props.address} />
             </Grid.Column>
           </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Column>
+              <Link route={`/drivers/${this.props.address}/requests`}>
+                <a>
+                  <Button primary>View Trip Requests</Button>
+                </a>
+              </Link>
+            </Grid.Column>
+          </Grid.Row>
+
         </Grid>
       </Layout>
     );
