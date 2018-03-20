@@ -3,7 +3,7 @@ import DriverFactory from './build/DriverFactory.json';
 
 const instance = new web3.eth.Contract(
   JSON.parse(DriverFactory.interface),
-  '0x5Ab6120a3fd29cB6f275B4cB6D2e24ba54186535'
+  '0xbf1E8a47a74737363ba63D03CFe78196c9325101'
 );
 
 export default instance;
