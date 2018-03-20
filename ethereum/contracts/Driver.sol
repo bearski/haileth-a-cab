@@ -3,6 +3,7 @@ pragma solidity ^0.4.19;
 /*
   contract DriverFactory
   contract Driver
+  contract EscrowFactory
   contract Escrow
 */
 
@@ -11,10 +12,10 @@ contract DriverFactory {                            // factory to be create driv
     address[] public driverDb;
     mapping(address => bool) public driverExists;
 
-    function createDriver() public {
+    function createDriver(string _name) public {
         require(!driverExists[msg.sender]);         // create driver once only
 
-        address newDriver = new Driver(msg.sender);
+        address newDriver = new Driver(msg.sender, _name);
         driverDb.push(newDriver);
 
         driverExists[msg.sender] = true;
@@ -33,6 +34,7 @@ contract DriverFactory {                            // factory to be create driv
 contract Driver {
     uint constant RATE_PER_KM = 10;
     address public driver;
+    string public name;
 
     struct Trip {
         uint distance;
@@ -49,8 +51,9 @@ contract Driver {
       _;
     }
 
-    function Driver(address _driver) public payable {
+    function Driver(address _driver, string _name) public payable {
         driver = _driver;
+        name = _name;
     }
 
     function createTrip(uint _distance, address _passenger) notDriver public {
@@ -77,6 +80,27 @@ contract Driver {
     }
 }
 
+
+/*
+  contract EscrowFactory
+*/
+
+contract EscrowFactory {
+    address[] public deployedEscrows;
+
+    function createEscrow(address _seller) public {
+        address newEscrow = new Escrow(msg.sender);
+        deployedEscrows.push(newEscrow);
+    }
+
+    function getDeployedEscrows() public view returns (address[]){
+        return deployedEscrows;
+    }
+}
+
+/*
+  contract Escrow
+*/
 
 contract Escrow {
 
